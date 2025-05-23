@@ -2,6 +2,9 @@ server:
   listen_port: 6226
   bind_address: "0.0.0.0"
   database_location: "/opt/nilis/local.db"
+  use_tls: false
+  tls_cert: /etc/nilis/tls/tls.crt
+  tls_key: /etc/nilis/tls/tls.key
 
 sharding:
   enabled: true

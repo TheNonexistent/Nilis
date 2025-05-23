@@ -13,6 +13,7 @@ var defaults = map[string]any{
 	"server.listen_port":       6226,
 	"server.bind_address":      "0.0.0.0",
 	"server.database_location": "/opt/nilis/local.db",
+	"server.use_tls":           false,
 
 	"sharding.enabled":  false,
 	"sharding.shard_id": 0,
@@ -28,6 +29,9 @@ type Config struct {
 		ListenPort       int    `mapstructure:"listen_port"`
 		BindAddress      string `mapstructure:"bind_address"`
 		DatabaseLocation string `mapstructure:"database_location"`
+		UseTLS           bool   `mapstructure:"use_tls"`
+		TLSCert          string `mapstructure:"tls_cert"`
+		TLSKey           string `mapstructure:"tls_key"`
 	} `mapstructure:"server"`
 
 	Sharding struct {
@@ -78,6 +82,14 @@ func validateConfig(config *Config) error {
 	}
 	if config.Server.DatabaseLocation == "" {
 		return errors.New("database location cannot be empty")
+	}
+
+	if config.Server.UseTLS && config.Server.TLSCert == "" {
+		return errors.New("tls certificate location cannot be empty when using tls mode")
+	}
+
+	if config.Server.UseTLS && config.Server.TLSKey == "" {
+		return errors.New("tls key location cannot be empty when using tls mode")
 	}
 
 	if config.Logging.Level == "" {
