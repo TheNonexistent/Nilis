@@ -1,0 +1,30 @@
+server:
+  listen_port: 6226
+  bind_address: "0.0.0.0"
+  database_location: "/opt/nilis/local.db"
+
+sharding:
+  enabled: true
+  shard_id: 0
+  replica: false
+  shards:
+    - id: 0
+      address: "127.0.0.100:6226"
+      replicas:
+        - "127.0.0.101:6225"
+    - id: 1
+      address: "127.0.0.110:6226"
+      replicas:
+        - "127.0.0.111:6225"
+    - id: 2
+      address: "127.0.0.120:6226"
+      replicas:
+        - "127.0.0.121:6225"
+    - id: 3
+      address: "127.0.0.130:6226"
+      replicas:
+        - "127.0.0.131:6225"
+
+logging:
+  level: "info"
+  file: "/var/log/nilis.log"
