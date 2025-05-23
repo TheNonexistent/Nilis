@@ -17,6 +17,10 @@ func main() {
 		log.Fatal().Err(err).Msg("error in initial configuration")
 	}
 
+	if err := validateConfig(&config); err != nil {
+		log.Fatal().Err(err).Msg("invalid configuration")
+	}
+
 	initLogger(config.Logging.Level)
 
 	fmt.Printf("%+v", config)
