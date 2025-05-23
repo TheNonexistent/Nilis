@@ -61,12 +61,15 @@ func startGRPCServer(storeServer *Server) error {
 	}
 
 	srvOpts := []grpc.ServerOption{}
+	unaryServerInterceptors := []grpc.UnaryServerInterceptor{}
 
-	srvOpts = append(srvOpts, grpc.UnaryInterceptor(UnaryCancelInterceptor))
+	unaryServerInterceptors = append(unaryServerInterceptors, UnaryCancelInterceptor)
 
 	if strings.ToLower(config.Logging.Level) == "debug" {
-		srvOpts = append(srvOpts, grpc.UnaryInterceptor(UnaryLoggingInterceptor))
+		unaryServerInterceptors = append(unaryServerInterceptors, UnaryLoggingInterceptor)
 	}
+
+	srvOpts = append(srvOpts, grpc.ChainUnaryInterceptor(unaryServerInterceptors...))
 
 	if config.Server.UseTLS {
 		creds, err := credentials.NewServerTLSFromFile(config.Server.TLSCert, config.Server.TLSKey)
