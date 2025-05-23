@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package store;
+
+option go_package = "github.com/thenonexistent/nilis/pkg/store;store";
+
+import "google/protobuf/empty.proto";
+
+message Key {
+    string key = 1;
+}
+
+message Value {
+    string key = 1;
+    bytes value = 2;
+}
+
+service Store {
+    rpc Set(Value) returns (google.protobuf.Empty);
+    rpc Get(Key) returns (Value);
+    rpc Delete(Key) returns (google.protobuf.Empty);
+}
