@@ -52,13 +52,12 @@ func loadConfig(config *Config) error {
 	v.AddConfigPath("/etc/nilis")
 	v.AddConfigPath(".")
 
-	for k, v := range defaults {
-		viper.SetDefault(k, v)
+	for key, value := range defaults {
+		v.SetDefault(key, value)
 	}
 
 	if err := v.ReadInConfig(); err != nil {
 		log.Warn().Err(err).Str("module", "configuration").Msg("could not read config file, using defaults...")
-		return nil
 	}
 
 	if err := v.Unmarshal(config); err != nil {
