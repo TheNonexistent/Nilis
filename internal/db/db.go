@@ -1,6 +1,10 @@
 package db
 
-import bolt "go.etcd.io/bbolt"
+import (
+	"fmt"
+
+	bolt "go.etcd.io/bbolt"
+)
 
 const defaultBucketName = "nilis"
 
@@ -9,14 +13,28 @@ type Database struct {
 }
 
 func NewDatabase(path string) (*Database, error) {
-	database, err := bolt.Open(path, 0600, nil)
+	localdb, err := bolt.Open(path, 0600, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Database{
-		database: database,
-	}, nil
+	database := &Database{
+		database: localdb,
+	}
+
+	if err := database.createDefaultBucket(); err != nil {
+		database.Close()
+		return nil, fmt.Errorf("failed creating default bucket: %w", err)
+	}
+
+	return database, nil
+}
+
+func (db *Database) createDefaultBucket() error {
+	return db.database.Update(func(tx *bolt.Tx) error {
+		_, err := tx.CreateBucketIfNotExists([]byte(defaultBucketName))
+		return err
+	})
 }
 
 func (db *Database) SetKey(key string, value []byte) error {
