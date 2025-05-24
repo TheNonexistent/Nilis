@@ -9,16 +9,19 @@ import (
 	"github.com/thenonexistent/nilis/internal/db"
 	"github.com/thenonexistent/nilis/pkg/sharding"
 	"github.com/thenonexistent/nilis/pkg/store"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type Server struct {
-	db     *db.Database
-	shard  sharding.Shard
-	shards []sharding.Shard
-	config *cfg.Config
+	db        *db.Database
+	shard     sharding.Shard
+	shards    []sharding.Shard
+	shardPool map[int]*ShardClient
+	config    *cfg.Config
 	store.StoreServer
 }
 
@@ -48,6 +51,22 @@ func NewServer(config *cfg.Config, shard sharding.Shard, shards []sharding.Shard
 		shards: shards,
 		config: config,
 	}, database.Close, nil
+}
+
+func (s *Server) InitCluster() error {
+	for _, shard := range s.shards {
+		if shard.ID == s.shard.ID.ID {
+			continue
+		}
+
+		cnOpts := []grpc.DialOption{}
+
+		if s.config.Server.UseTLS {
+			creds, err := credentials.NewClientTLSFromFile()
+		}
+
+		conn, err := grpc.NewClient(shard.Address)
+	}
 }
 
 func (s *Server) Set(ctx context.Context, in *store.Value) (*emptypb.Empty, error) {

@@ -1,3 +1,9 @@
+## 0.2.0 (2025-05-24)
+
+### Feat
+
+- **mtls**: server side mtls implementation
+
 ## 0.1.0 (2025-05-24)
 
 ### Feat
