@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"errors"
@@ -51,7 +51,7 @@ type Config struct {
 	} `mapstructure:"logging"`
 }
 
-func loadConfig(config *Config) error {
+func LoadConfig(config *Config) error {
 	v := viper.New()
 	v.SetConfigName("nilis")
 	v.SetConfigType("yaml")
@@ -73,7 +73,7 @@ func loadConfig(config *Config) error {
 	return nil
 }
 
-func validateConfig(config *Config) error {
+func ValidateConfig(config *Config) error {
 	if config.Server.ListenPort <= 0 || config.Server.ListenPort > 65535 {
 		return fmt.Errorf("invalid listen port: %d", config.Server.ListenPort)
 	}

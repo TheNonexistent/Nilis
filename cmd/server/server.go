@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/rs/zerolog/log"
+	cfg "github.com/thenonexistent/nilis/internal/config"
 	"github.com/thenonexistent/nilis/internal/db"
 	"github.com/thenonexistent/nilis/pkg/store"
 	"google.golang.org/grpc/codes"
@@ -14,10 +15,10 @@ import (
 type Server struct {
 	db *db.Database
 	store.StoreServer
-	config *Config
+	config *cfg.Config
 }
 
-func NewServer(config *Config) (*Server, func() error, error) {
+func NewServer(config *cfg.Config) (*Server, func() error, error) {
 	database, err := db.NewDatabase(config.Server.DatabaseLocation)
 	if err != nil {
 		log.Error().Str("module", "server").Err(err).Msg("failed to create database for store")

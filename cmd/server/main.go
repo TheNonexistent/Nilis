@@ -8,21 +8,22 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	cfg "github.com/thenonexistent/nilis/internal/config"
 	"github.com/thenonexistent/nilis/pkg/store"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
 )
 
-var config Config
+var config cfg.Config
 
 func main() {
 
-	if err := loadConfig(&config); err != nil {
+	if err := cfg.LoadConfig(&config); err != nil {
 		log.Fatal().Str("module", "main").Err(err).Msg("error in initial configuration")
 	}
 
-	if err := validateConfig(&config); err != nil {
+	if err := cfg.ValidateConfig(&config); err != nil {
 		log.Fatal().Str("module", "main").Err(err).Msg("invalid configuration")
 	}
 
