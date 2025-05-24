@@ -29,5 +29,5 @@ sharding:
         - "127.0.0.131:6225"
 
 logging:
-  level: "info"
+  level: "debug"
   file: "/var/log/nilis.log"

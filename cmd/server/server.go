@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/rs/zerolog/log"
 	cfg "github.com/thenonexistent/nilis/internal/config"
 	"github.com/thenonexistent/nilis/internal/db"
+	"github.com/thenonexistent/nilis/pkg/sharding"
 	"github.com/thenonexistent/nilis/pkg/store"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -13,12 +15,27 @@ import (
 )
 
 type Server struct {
-	db *db.Database
-	store.StoreServer
+	db     *db.Database
+	shard  sharding.Shard
+	shards []sharding.Shard
 	config *cfg.Config
+	store.StoreServer
 }
 
-func NewServer(config *cfg.Config) (*Server, func() error, error) {
+func NewServer(config *cfg.Config, shard sharding.Shard, shards []sharding.Shard) (*Server, func() error, error) {
+	if config == nil {
+		return nil, nil, fmt.Errorf("null configuration provided")
+	}
+
+	if isShardEmpty(shard) {
+		return nil, nil, fmt.Errorf("server shard is not initialized")
+	}
+
+	if len(shards) == 0 {
+		return nil, nil, fmt.Errorf("shard list should contain at least one shard")
+
+	}
+
 	database, err := db.NewDatabase(config.Server.DatabaseLocation)
 	if err != nil {
 		log.Error().Str("module", "server").Err(err).Msg("failed to create database for store")
@@ -27,6 +44,8 @@ func NewServer(config *cfg.Config) (*Server, func() error, error) {
 
 	return &Server{
 		db:     database,
+		shard:  shard,
+		shards: shards,
 		config: config,
 	}, database.Close, nil
 }
@@ -67,4 +86,8 @@ func (s *Server) Delete(ctx context.Context, in *store.Key) (*emptypb.Empty, err
 	}
 
 	return &emptypb.Empty{}, nil
+}
+
+func isShardEmpty(shard sharding.Shard) bool {
+	return shard.ID == 0 && shard.Address == ""
 }

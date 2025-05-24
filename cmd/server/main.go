@@ -9,6 +9,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	cfg "github.com/thenonexistent/nilis/internal/config"
+	"github.com/thenonexistent/nilis/pkg/sharding"
 	"github.com/thenonexistent/nilis/pkg/store"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -29,11 +30,38 @@ func main() {
 
 	initLogger(config.Logging.Level)
 
-	storeServer, cancelFunc, err := NewServer(&config)
+	var shards []sharding.Shard
+	var serverShard sharding.Shard
+
+	if config.Sharding.Enabled {
+		var err error
+		var ok bool
+
+		shards, err = createShardsFromConfig(&config)
+		if err != nil {
+			log.Fatal().Err(err).Msg("failed creating shards based on provided configuraion")
+		}
+
+		serverShard, ok = sharding.FindShardById(shards, config.Sharding.ShardID)
+		if !ok {
+			log.Fatal().Int("shard_id", config.Sharding.ShardID).Msg("provided shard id is not present withing sharding configuration")
+		}
+	} else {
+		serverShard = sharding.Shard{
+			ID:       0,
+			Address:  fmt.Sprintf("%s:%d", config.Server.BindAddress, config.Server.ListenPort),
+			Replicas: []sharding.Replica{},
+		}
+		shards = []sharding.Shard{serverShard}
+	}
+
+	storeServer, cancelFunc, err := NewServer(&config, serverShard, shards)
 	if err != nil {
 		log.Fatal().Str("module", "main").Err(err).Msg("failed to create store server")
 	}
 	defer cancelFunc()
+
+	log.Info().Int("shard_id", serverShard.ID).Msg("initialized server")
 
 	errChan := make(chan error, 2)
 	sigChan := make(chan os.Signal, 1)
