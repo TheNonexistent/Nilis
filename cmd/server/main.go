@@ -12,7 +12,6 @@ import (
 	"github.com/thenonexistent/nilis/pkg/sharding"
 	"github.com/thenonexistent/nilis/pkg/store"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -101,9 +100,9 @@ func startGRPCServer(storeServer *Server) error {
 	srvOpts = append(srvOpts, grpc.ChainUnaryInterceptor(unaryServerInterceptors...))
 
 	if config.Server.UseTLS {
-		creds, err := credentials.NewServerTLSFromFile(config.Server.TLSCert, config.Server.TLSKey)
+		creds, err := newServerTLS(&config)
 		if err != nil {
-			return fmt.Errorf("failed to load certificates: %w", err)
+			return fmt.Errorf("failed to initiate mtls: %w", err)
 		}
 
 		srvOpts = append(srvOpts, grpc.Creds(creds))

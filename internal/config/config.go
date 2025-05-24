@@ -32,6 +32,7 @@ type Config struct {
 		UseTLS           bool   `mapstructure:"use_tls"`
 		TLSCert          string `mapstructure:"tls_cert"`
 		TLSKey           string `mapstructure:"tls_key"`
+		TLSCA            string `mapstructure:"tls_ca"`
 	} `mapstructure:"server"`
 
 	Sharding struct {
@@ -90,6 +91,10 @@ func ValidateConfig(config *Config) error {
 
 	if config.Server.UseTLS && config.Server.TLSKey == "" {
 		return errors.New("tls key location cannot be empty when using tls mode")
+	}
+
+	if config.Server.UseTLS && config.Server.TLSCA == "" {
+		return errors.New("tls ca certificate location cannot be empty when using tls mode")
 	}
 
 	if config.Logging.Level == "" {

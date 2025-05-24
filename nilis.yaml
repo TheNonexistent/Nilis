@@ -5,6 +5,7 @@ server:
   use_tls: false
   tls_cert: /etc/nilis/tls/tls.crt
   tls_key: /etc/nilis/tls/tls.key
+  tls_ca: /etc/nilis/tls/ca.crt
 
 sharding:
   enabled: true
